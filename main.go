@@ -6,18 +6,63 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"net/url"
 	"os"
+	"strings"
 
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
 	"google.golang.org/protobuf/proto"
 )
 
+func readQRFromImage(imagePath string) (string, error) {
+	file, err := os.Open(imagePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return "", err
+	}
+
+	bmp, err := gozxing.NewBinaryBitmapFromImage(img)
+	if err != nil {
+		return "", err
+	}
+
+	reader := qrcode.NewQRCodeReader()
+	result, err := reader.Decode(bmp, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return result.GetText(), nil
+}
+
 func main() {
 	var base64Data = flag.String("data", "", "Base64 encoded Google Authenticator export data")
+	var imagePath = flag.String("image", "", "Path to QR code image file")
 	flag.Parse()
 
-	if *base64Data == "" {
+	if *imagePath != "" {
+		qrText, err := readQRFromImage(*imagePath)
+		if err != nil {
+			log.Fatalf("Failed to read QR code from image: %v", err)
+		}
+		
+		// Extract base64 data from QR code URL
+		if strings.HasPrefix(qrText, "otpauth-migration://offline?data=") {
+			*base64Data = strings.TrimPrefix(qrText, "otpauth-migration://offline?data=")
+		} else {
+			log.Fatalf("Invalid QR code format. Expected otpauth-migration URL, got: %s", qrText)
+		}
+	} else if *base64Data == "" {
 		fmt.Print("Paste Base64 string: ")
 		fmt.Scanln(base64Data)
 	}
