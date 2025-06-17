@@ -42,7 +42,7 @@ func main() {
 	defer writer.Flush()
 
 	// CSV header for KeePassXC
-	writer.Write([]string{"Title", "Username", "Password", "TOTP Secret"})
+	writer.Write([]string{"Title", "Username", "Password", "TOTP"})
 
 	for _, otp := range payload.OtpParameters {
 		title := otp.GetIssuer()
