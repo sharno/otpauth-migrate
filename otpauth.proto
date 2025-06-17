@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = ".;main";
+
+message MigrationPayload {
+  repeated OTPParameters otp_parameters = 1;
+  int32 version = 2;
+  int32 batch_size = 3;
+  int32 batch_index = 4;
+  int32 batch_id = 5;
+
+  message OTPParameters {
+    bytes secret = 1;
+    string name = 2;
+    string issuer = 3;
+    int32 algorithm = 4;
+    int32 digits = 5;
+    int64 counter = 6;
+    int32 type = 7;
+  }
+}
