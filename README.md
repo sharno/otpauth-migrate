@@ -2,6 +2,12 @@
 
 Tool to export Google Authenticator OTP entries to CSV format compatible with KeePassXC.
 
+Some of the goals of this tool:
+- The code should be very simple to read to make sure you are not running something that might steal your TOTPs
+- It should deal with QR images so that you can use the tool directly with the export of Google Authenticator
+- Export in CSV format to import easily in KeePassXC
+- A cli tool for maximum flexibility if you want to migrate a big number of TOTPs
+
 ## Usage
 
 ### From QR Code Image
